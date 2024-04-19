@@ -38,6 +38,7 @@
     "typescript": "^5.4.5"
   },
   "dependencies": {
+    "mongodb": "^6.5.0",
     "node-telegram-bot-api": "^0.65.1"
   }
 }

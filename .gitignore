@@ -1,7 +1,7 @@
 tmp/**/*
 node_modules/**/*
 dist/**/*
-conf/**/options.js
+conf/**/options.ts
 package-lock.json
 .pid
 *.log
