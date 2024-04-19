@@ -13,7 +13,11 @@ export interface Item {
 }
 
 export function isItem(item: any): item is Item {
-    return 'type' in item;
+    try {
+        return 'type' in item;
+    } catch (e) {
+        return false;
+    }
 }
 
 export enum StoredTypes{

@@ -12,4 +12,17 @@ mdb.init().then(() => {
         const mainFolder = await mdb.getMainFolder();
         bot.sendMessage(chatId, "Welcome to " + mainFolder.title, {reply_markup: await botService.renderItemKeyboard(mainFolder)})
     });
+
+    bot.on('callback_query', async (callback) => {
+        if (! callback.data) return;
+        if (! callback.message) return;
+        const itemUri = callback.data;
+        const msg = callback.message;
+        await bot.editMessageText(await botService.renderItemMesssageBody(itemUri), { 
+            chat_id: msg.chat.id,
+             message_id: msg.message_id,
+              parse_mode: "HTML", reply_markup: await botService.renderItemKeyboard(itemUri)
+        });
+        
+    })
 })

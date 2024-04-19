@@ -34,4 +34,8 @@ export class MongoDbClient {
         }
         return [];
     }
+
+    public async getItemByUri(uri: string): Promise<Item> {
+        return (await this.mainCollection.findOne({ _id: new ObjectId(uri)})) as Item;
+    }
 }
