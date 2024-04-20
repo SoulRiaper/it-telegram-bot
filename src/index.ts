@@ -16,12 +16,18 @@ mdb.init().then(() => {
     bot.on('callback_query', async (callback) => {
         if (! callback.data) return;
         if (! callback.message) return;
-        const itemUri = callback.data;
+        const callbackData = callback.data;
         const msg = callback.message;
-        await bot.editMessageText(await botService.renderItemMesssageBody(itemUri), { 
+        const chatId = msg.chat.id;
+        //Pages handling
+        if (callbackData == "prevPage" || callbackData == "nextPage") {
+            
+        }
+
+        await bot.editMessageText(await botService.renderItemMesssageBody(callbackData), { 
             chat_id: msg.chat.id,
-             message_id: msg.message_id,
-              parse_mode: "HTML", reply_markup: await botService.renderItemKeyboard(itemUri)
+            message_id: msg.message_id,
+            parse_mode: "HTML", reply_markup: await botService.renderItemKeyboard(callbackData)
         });
         
     })

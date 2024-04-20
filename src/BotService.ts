@@ -10,17 +10,17 @@ export class BotService {
     
     constructor (dbClient: MongoDbClient) {
         this.keyboardRows = 4;
-        this.keyboardItemsInRow = 1;
+        this.keyboardItemsInRow = 2;
         this.dbClient = dbClient;
     }
 
-    public async renderItemKeyboard (item: Item | string, offset?: number): Promise<InlineKeyboardMarkup> {
+    public async renderItemKeyboard (item: Item | string, page?: number): Promise<InlineKeyboardMarkup> {
         if (! isItem(item)) {
             item = await this.dbClient.getItemByUri(item)
         }
         if (item.type == StoredTypes.FOLDER) {
-            offset = offset? offset : 0;
-            const folderItems = await this.dbClient.getFolderItems(item, offset);
+            page = page? page : 0;
+            const folderItems = await this.dbClient.getFolderItems(item, page * this.keyboardItemsInRow * this.keyboardRows);
             let keyboard: Array<Array<InlineKeyboardButton>> = [];
             for (let i = 0; i < this.keyboardRows; i++) {
                 keyboard.push([]);
@@ -33,6 +33,12 @@ export class BotService {
             return {inline_keyboard: keyboard};
         }
         return {inline_keyboard: [[]]};
+    }
+    
+    public async getKeyboardForItem(item: Item, page?: number): Promise<InlineKeyboardMarkup> {
+        let keyboard = await this.renderItemKeyboard(item, page);
+        keyboard.inline_keyboard.push([{text: "<-", callback_data: "prevPage"}, {text: "->", callback_data: "nextPage"}]);
+        return keyboard;
     }
 
     public async renderItemMesssageBody (item: Item | string) {
@@ -57,5 +63,9 @@ export class BotService {
                 reply_markup: await this.renderItemKeyboard(item)
             }
         };
+    }
+
+    public async renderUserItemPage(userId: string, item: Item | string) {
+        
     }
 }
