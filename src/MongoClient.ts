@@ -11,7 +11,7 @@ export class MongoDbClient {
 
     constructor () {
         // TODO: load from options or system environment
-        this.url = 'mongodb://localhost:27017';
+        this.url = 'mongodb://mongodb:27017';
         this.client = new MongoClient(this.url);
     }
 
@@ -50,7 +50,9 @@ export class MongoDbClient {
             { $set: 
                 {
                     previousItem: previousItem._id,
-                    targetItem: targetItem._id}
+                    targetItem: targetItem._id,
+                    page
+                }
             });
         } else {
             await this.userActions.insertOne({ userId, targetItem: targetItem._id, previousItem: previousItem._id, page});

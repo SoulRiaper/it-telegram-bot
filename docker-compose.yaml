@@ -1,6 +1,12 @@
 version: '3'
 services:
 
+  tg-bot:
+    build: .
+    ports:
+      - "443:443"
+    depends_on:
+      - mongodb
 
   mongodb:
     image: mongo:latest

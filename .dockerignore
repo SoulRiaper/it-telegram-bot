@@ -1,0 +1,5 @@
+node_modules
+docker-compose.yaml
+ReadMe.md
+build
+.eslintrc.json
