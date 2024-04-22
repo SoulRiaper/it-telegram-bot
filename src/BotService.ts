@@ -1,5 +1,5 @@
 import { isItem, Item, StoredTypes } from "./IItems";
-import { InlineKeyboardButton, InlineKeyboardMarkup, Chat } from "node-telegram-bot-api";
+import { InlineKeyboardButton, InlineKeyboardMarkup, Chat, SendMessageOptions, EditMessageTextOptions } from "node-telegram-bot-api";
 import { MongoDbClient } from "./MongoClient";
 
 
@@ -10,7 +10,7 @@ export class BotService {
     
     constructor (dbClient: MongoDbClient) {
         this.keyboardRows = 4;
-        this.keyboardItemsInRow = 2;
+        this.keyboardItemsInRow = 1;
         this.dbClient = dbClient;
     }
 
@@ -35,37 +35,55 @@ export class BotService {
         return {inline_keyboard: [[]]};
     }
     
-    public async getKeyboardForItem(item: Item, page?: number): Promise<InlineKeyboardMarkup> {
+    public async getKeyboardForFolder(item: Item, page?: number): Promise<InlineKeyboardMarkup> {
         let keyboard = await this.renderItemKeyboard(item, page);
-        keyboard.inline_keyboard.push([{text: "<-", callback_data: "prevPage"}, {text: "->", callback_data: "nextPage"}]);
+        keyboard.inline_keyboard.push([
+            {text: "<-", callback_data: "prevPage"},
+            {text: "Назад", callback_data: "back"},
+            {text: "->", callback_data: "nextPage"},
+        ]);
         return keyboard;
     }
 
-    public async renderItemMesssageBody (item: Item | string) {
+    public getKeyboardForItem(): InlineKeyboardMarkup {
+        return {
+            inline_keyboard:
+            [[{text: "Назад", callback_data: "back"}]]
+        }
+    }    
+
+    public async renderItemMesssageBody (item: Item | string, page?: number) {
+        page = page? page : 0;
         if (! isItem(item)) {
             item = await this.dbClient.getItemByUri(item)
         }
         if (item.type == StoredTypes.ITEM) {
             return `<a href="${item.hasItem}">${item.title}</a>`
         } else {
-            return `<b>${item.title}</b>`
+            return `<b>${item.title}</b> page: ${page}`
         }
     }
 
-    public async renderMessageForItem(chatId: Chat , item: Item | string) {
+    public async getOptionsForItem(item: Item | string, page?: number): Promise<SendMessageOptions> {
         if (! isItem(item)) {
             item = await this.dbClient.getItemByUri(item)
         }
-        return {
-            chatId,
-            text: await this.renderItemMesssageBody(item),
-            options: {
-                reply_markup: await this.renderItemKeyboard(item)
+        if (item.type == StoredTypes.ITEM) {
+            return {
+                parse_mode: "HTML",
+                reply_markup: this.getKeyboardForItem()
             }
-        };
+        }
+        return {
+            parse_mode: "HTML",
+            reply_markup: await this.getKeyboardForFolder(item, page)
+        }
     }
 
-    public async renderUserItemPage(userId: string, item: Item | string) {
-        
+    public async getOptionsForEditItem(chatId: number, messageId: number, item: Item, page: number): Promise<EditMessageTextOptions> {
+        let opts = await this.getOptionsForItem(item, page) as EditMessageTextOptions;
+        opts.chat_id = chatId;
+        opts.message_id = messageId;
+        return opts;
     }
 }
