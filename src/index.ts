@@ -32,7 +32,6 @@ mdb.init().then(() => {
             const targetItem = await mdb.getItemByUri(userTarget.targetItem.toString());
             if (callbackData == "nextPage") {
                 const itemPage = userTarget.page ? userTarget.page + 1 : 1;
-                console.log("Get command to render new page, prew page", userTarget.page, "needed:", itemPage)
                 try {
                     //TODO: refactor that shit
                     await bot.editMessageText(
