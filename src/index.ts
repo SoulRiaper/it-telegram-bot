@@ -2,7 +2,6 @@ import options from "../conf/options"
 import TelegramBot, {Message, ParseMode, InlineKeyboardMarkup} from "node-telegram-bot-api"
 import { MongoDbClient } from "./MongoClient";
 import { BotService } from "./BotService";
-import { isItem } from "./IItems";
 
 const bot = new TelegramBot(options.bot.token, {polling: true});
 const mdb = new MongoDbClient();
@@ -110,13 +109,26 @@ mdb.init().then(() => {
             }   
         }
 
-        const targetItem = await mdb.getItemByUri(userTarget.targetItem.toString());
-        const jumpInItem = await mdb.getItemByUri(callbackData);
-        await bot.editMessageText(
-            await botService.renderItemMesssageBody(callbackData),
-            await botService.getOptionsForEditItem(chatId, msg.message_id ,jumpInItem, 0)
-        );
-        await mdb.storeUserInfo(chatId.toString(), jumpInItem, targetItem, 0);
-        return;
+        try {
+            const targetItem = await mdb.getItemByUri(userTarget.targetItem.toString());
+            const jumpInItem = await mdb.getItemByUri(callbackData);
+            await bot.editMessageText(
+                await botService.renderItemMesssageBody(callbackData),
+                await botService.getOptionsForEditItem(chatId, msg.message_id ,jumpInItem, 0)
+            );
+            await mdb.storeUserInfo(chatId.toString(), jumpInItem, targetItem, 0);
+            return;
+        } catch (error: any) {
+            console.log(error.message)
+            await bot.deleteMessage(chatId, msg.message_id);
+            const mainFolder = await mdb.getMainFolder();
+            bot.sendMessage(
+                chatId,
+                await botService.renderItemMesssageBody(mainFolder, 0),
+                await botService.getOptionsForItem(mainFolder) );
+            await mdb.storeUserInfo(chatId.toString(), mainFolder, mainFolder, 0);
+            return;
+        }
+        
     })
 })

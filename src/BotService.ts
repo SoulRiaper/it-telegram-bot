@@ -26,7 +26,7 @@ export class BotService {
                 keyboard.push([]);
                 for (let j = 0; j < this.keyboardItemsInRow; j ++) {
                     if (! folderItems[i + j]) break;
-                    keyboard[i].push({ text: folderItems[i + j].title, callback_data: folderItems[i + j]._id.toString()})
+                    keyboard[i].push({ text: this.getItemLabel(folderItems[i + j]), callback_data: folderItems[i + j]._id.toString()})
                 }
                 if (! folderItems[i * this.keyboardItemsInRow]) break;
             }
@@ -85,5 +85,13 @@ export class BotService {
         opts.chat_id = chatId;
         opts.message_id = messageId;
         return opts;
+    }
+
+    public getItemLabel(item: Item): string {
+        const addition = item.type == StoredTypes.ITEM? " 🗒️" : " 📁"
+        if (item.title.length > 54) {
+            return item.title.slice(0, 54) + addition
+        }
+        else return item.title + addition;
     }
 }

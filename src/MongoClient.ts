@@ -33,7 +33,7 @@ export class MongoDbClient {
     public async getFolderItems (item: Item, offset: number): Promise<Item[]> {
         if (item.type == StoredTypes.FOLDER) {
             if (item.hasItem instanceof Array) {
-                return await this.mainCollection.find({ _id: { $in: item.hasItem.slice(offset)}}).toArray();
+                return await this.mainCollection.find({ _id: { $in: item.hasItem.slice(offset)}}).sort({type:1}).toArray();
             }
         }
         return [];
